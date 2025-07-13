@@ -23,11 +23,11 @@ async def add_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return await update.message.reply_text("❌ Трафик и срок должны быть числами.")
 
     cmd = [
-        "docker", "exec", "marzban_marzban_1",
-        "python3", "/path/to/marzban-cli.py", "cli", "add-user", username,
+        "python3", "/opt/fdg_admin_panel_bot/marzban-cli.py", "cli", "add-user", username,
         "--limit", str(traffic),
         "--expiry", str(days)
     ]
+
 
 
     try:
