@@ -4,8 +4,8 @@ from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 from control import BOT, ADMIN
 from handlers.status import get_status_handler
-from handlers.add_user import get_adduser_handler
 from handlers.del_user import get_deluser_handler
+from handlers.add_user import get_add_user_handler
 
 def is_authorized(user_id):
     return user_id in ADMIN
@@ -20,8 +20,9 @@ def main():
     app = ApplicationBuilder().token(BOT).build()
     app.add_handler(CommandHandler("start", start))
     app.add_handler(get_status_handler())
-    app.add_handler(get_adduser_handler())
+    app.add_handler(get_add_user_handler())
     app.add_handler(get_deluser_handler())
+
 
     app.run_polling()
 
