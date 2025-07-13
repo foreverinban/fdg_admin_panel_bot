@@ -1,6 +1,7 @@
 from telegram import Update
 from telegram.ext import ContextTypes, CommandHandler
-import subprocess
+from app.db import GetDB, crud
+from app.db.schemas import UserCreate  # Импорт корректный, проверь у себя
 from control import ADMIN
 
 def is_authorized(user_id):
@@ -14,30 +15,28 @@ async def add_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if len(args) != 3:
         return await update.message.reply_text("❌ Использование: /adduser <имя> <трафик_ГБ> <дней>")
 
-    username, traffic, days = args
+    username, traffic_str, days_str = args
 
     try:
-        traffic = int(traffic)
-        days = int(days)
+        traffic = int(traffic_str)
+        days = int(days_str)
     except ValueError:
         return await update.message.reply_text("❌ Трафик и срок должны быть числами.")
 
-    cmd = [
-        "docker", "exec", "marzban_marzban_1",
-        "python3", "/code/marzban-cli.py", "add-user", username,
-        "--limit", str(traffic),
-        "--expiry", str(days)
-    ]
-
-
-
-
+    # Создаем объект UserCreate с необходимыми полями.
+    new_user = UserCreate(
+        username=username,
+        data_limit=traffic * (1024 ** 3),  # ГБ в байты
+        expire=days,
+        # Добавь остальные обязательные поля, если нужно
+    )
 
     try:
-        result = subprocess.run(cmd, capture_output=True, text=True, check=True)
-        await update.message.reply_text(f"✅ Пользователь `{username}` создан.\n\n{result.stdout}")
-    except subprocess.CalledProcessError as e:
-        await update.message.reply_text(f"❌ Ошибка при создании пользователя:\n{e.stderr or e.stdout}")
+        with GetDB() as db:
+            db_user = crud.create_user(db, new_user)
+        await update.message.reply_text(f"✅ Пользователь `{username}` успешно создан.")
+    except Exception as e:
+        await update.message.reply_text(f"❌ Ошибка при создании пользователя:\n{e}")
 
 def get_add_user_handler():
     return CommandHandler("adduser", add_user)
