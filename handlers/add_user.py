@@ -24,10 +24,11 @@ async def add_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     cmd = [
         "docker", "exec", "marzban_marzban_1",
-        "marzban", "cli", "add-user", username,
+        "python3", "/path/to/marzban-cli.py", "cli", "add-user", username,
         "--limit", str(traffic),
         "--expiry", str(days)
     ]
+
 
     try:
         result = subprocess.run(cmd, capture_output=True, text=True, check=True)
